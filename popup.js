@@ -1,70 +1,9 @@
-// acmicpc.net, codeforces.com
-// TODO: needs to be customizable with options
-const contestLists = {
-    'acmicpc': {
-        'url': 'https://www.acmicpc.net/contest/official/list',
-    },
-    'codeforces': {
-        'url': 'https://codeforces.com/contests',
-    }
-};
-const intervalQueues = [];
-
-const formatBeginAt = function (timestamp) {
-    let date = new Date(timestamp);
-    let year = date.getFullYear();
-    let month = date.getMonth() + 1;
-    let day = date.getDate();
-
-    let hour = date.getHours();
-    let minute = date.getMinutes();
-    let second = date.getSeconds();
-
-    let fmt = `시작일자: ${year}년 ${month}월 ${day}일  ${hour}시 ${minute}분 ${second}초`;
-    return fmt;
-};
-
-const formatUntil = function (msTime) {
-    let sTime = Math.floor(msTime / 1000);
-
-    let day = Math.floor(sTime / 86400);
-    let hour = Math.floor((sTime - day * 86400) / 3600);
-    let minute = Math.floor((sTime - day * 86400 - hour * 3600) / 60);
-    let second = Math.floor((sTime - day * 86400 - hour * 3600 - minute * 60));
-
-    let fmt = '남은시간: ';
-    if (day != 0) fmt += `${day}일 `;
-    if (hour != 0) fmt += `${hour}시간 `;
-    if (minute != 0) fmt += `${minute}분 `;
-    if (second != 0) fmt += `${second}초 `;
-
-    return fmt;
-};
-
-const formatDuration = function (msTime) {
-    let sTime = Math.floor(msTime / 1000);
-
-    let day = Math.floor(sTime / 86400);
-    let hour = Math.floor((sTime - day * 86400) / 3600);
-    let minute = Math.floor((sTime - day * 86400 - hour * 3600) / 60);
-    let second = Math.floor((sTime - day * 86400 - hour * 3600 - minute * 60));
-
-    let fmt = '';
-    if (day != 0) fmt += `${day}일 `;
-    if (hour != 0) fmt += `${hour}시간 `;
-    if (minute != 0) fmt += `${minute}분 `;
-    if (second != 0) fmt += `${second}초 `;
-
-    return fmt;
-};
-
 const renderContests = function (results) {
     if (!results) return;
 
     let contestList = document.querySelector('.contestList');
 
     contestList.innerHTML = "";
-    for (let interval of intervalQueues) clearInterval(interval);
 
     for (let key of Object.keys(results)) {
         let item = results[key];
@@ -79,7 +18,7 @@ const renderContests = function (results) {
         iconImg.classList.add('icon');
         iconImg.src = chrome.runtime.getURL(`images/logo/${item.siteName}.png`);
         iconImg.onclick = function () {
-            chrome.tabs.update({ url: contestLists[item.siteName].url });
+            chrome.tabs.update({ url: item.siteUrl });
         }
 
         let textWrapper = document.createElement('div');
@@ -91,31 +30,16 @@ const renderContests = function (results) {
 
         let beginAtText = document.createElement('p');
         beginAtText.classList.add('beginAt');
-        beginAtText.textContent = formatBeginAt(item.beginAt);
+        beginAtText.textContent = TIMEFORMATTER.beginAt2Readable(item.beginAt);
 
         let untilText = document.createElement('p');
         untilText.classList.add('until');
-        untilText.textContent = formatUntil(item.beginAt - new Date());
-        let interval = setInterval(function () {
-            let msTime = item.beginAt - new Date();
-            if (msTime >= 0) untilText.textContent = formatUntil(msTime);
-            else {
-                chrome.storage.sync.get(['contest'], function (value) {
-                    delete value.contest[item.name];
-                    chrome.storage.sync.set({ 'contest': value.contest });
-                });
-                let idx;
-                if (idx = intervalQueues.indexOf(this) !== -1) {
-                    intervalQueues.splice(idx);
-                    clearInterval(this);
-                }
-            }
-        }, 1000);
-        intervalQueues.push(interval);
+        untilText.setAttribute('data-contestname', item.name);
+        untilText.textContent = TIMEFORMATTER.until2Readable(item.beginAt - new Date());
 
         let durationText = document.createElement('p');
         durationText.classList.add('duration');
-        durationText.textContent = formatDuration(item.duration);
+        durationText.textContent = TIMEFORMATTER.duration2Readable(item.duration);
 
         iconWrapper.appendChild(iconImg);
 
@@ -131,11 +55,25 @@ const renderContests = function (results) {
     }
 };
 
-chrome.storage.sync.get(['contest'], function (value) {
-    let results = value.contest || {};
-    renderContests(results);
+const updateUntil = function (contest) {
+    const now = new Date();
+    const untilText = document.querySelector('p.until[data-contestname="' + contest.name + '"]');
+
+    untilText.textContent = TIMEFORMATTER.until2Readable(contest.beginAt - now.getTime());
+}
+
+STORAGE.getStorage(CONSTANTS.TYPELOCAL, [CONSTANTS.CONTESTS, CONSTANTS.BADGECOLOR], function (obj) {
+    const contests = obj[CONSTANTS.CONTESTS] || {};
+    const nContests = Object.keys(contests).length.toString();
+    const badgeColor = obj[CONSTANTS.BADGECOLOR];
+
+    chrome.browserAction.setBadgeText({ text: nContests });
+    chrome.browserAction.setBadgeBackgroundColor({ color: badgeColor });
+
+    renderContests(obj[CONSTANTS.CONTESTS]);
 });
 
-chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-    renderContests();
+chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
+    if (msg.command == 'renderContests') renderContests(msg.data[CONSTANTS.CONTESTS]);
+    if (msg.command == 'updateUntil') updateUntil(msg.data);
 });

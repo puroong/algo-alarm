@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "Alarm for Online Algorithm Contests",
   "background": {
-    "scripts": [ "background.js" ],
+    "page": "background.html",
     "persistant": false
   },
   "browser_action": {
