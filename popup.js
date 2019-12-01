@@ -1,3 +1,13 @@
+// acmicpc.net, codeforces.com
+// TODO: needs to be customizable with options
+const contestLists = {
+    'acmicpc': {
+        'url': 'https://www.acmicpc.net/contest/official/list',
+    },
+    'codeforces': {
+        'url': 'https://codeforces.com/contests',
+    }
+};
 const intervalQueues = [];
 
 const formatBeginAt = function (timestamp) {
@@ -56,6 +66,9 @@ const renderContests = function (results) {
         let iconImg = document.createElement('img');
         iconImg.classList.add('icon');
         iconImg.src = chrome.runtime.getURL(`images/logo/${item.siteName}.png`);
+        iconImg.onclick = function () {
+            chrome.tabs.update({ url: contestLists[item.siteName].url });
+        }
 
         let textWrapper = document.createElement('div');
         textWrapper.classList.add('wrap');
