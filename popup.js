@@ -32,7 +32,12 @@ const formatUntil = function (msTime) {
     let minute = Math.floor((sTime - day * 86400 - hour * 3600) / 60);
     let second = Math.floor((sTime - day * 86400 - hour * 3600 - minute * 60));
 
-    let fmt = `남은시간: ${day}일 ${hour}시간 ${minute}분 ${second}초`;
+    let fmt = '남은시간: ';
+    if (day != 0) fmt += `${day}일 `;
+    if (hour != 0) fmt += `${hour}시간 `;
+    if (minute != 0) fmt += `${minute}분 `;
+    if (second != 0) fmt += `${second}초 `;
+
     return fmt;
 };
 
@@ -44,7 +49,12 @@ const formatDuration = function (msTime) {
     let minute = Math.floor((sTime - day * 86400 - hour * 3600) / 60);
     let second = Math.floor((sTime - day * 86400 - hour * 3600 - minute * 60));
 
-    let fmt = `${day}일 ${hour}시간 ${minute}분 ${second}초`;
+    let fmt = '';
+    if (day != 0) fmt += `${day}일 `;
+    if (hour != 0) fmt += `${hour}시간 `;
+    if (minute != 0) fmt += `${minute}분 `;
+    if (second != 0) fmt += `${second}초 `;
+
     return fmt;
 };
 
