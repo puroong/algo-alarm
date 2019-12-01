@@ -95,6 +95,7 @@ const renderContests = function (results) {
 
         let untilText = document.createElement('p');
         untilText.classList.add('until');
+        untilText.textContent = formatUntil(item.beginAt - new Date());
         let interval = setInterval(function () {
             untilText.textContent = formatUntil(item.beginAt - new Date());
         }, 1000);
