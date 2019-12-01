@@ -135,6 +135,13 @@ const checkContest = function () {
     }
 };
 
+chrome.storage.onChanged.addListener(function (changes, namespaces) {
+    let results = changes['contest'].newValue;
+    chrome.runtime.sendMessage(results);
+    chrome.browserAction.setBadgeText({ text: Object.keys(results).length.toString() });
+    chrome.browserAction.setBadgeBackgroundColor({ color: 'red' });
+});
+
 // check contest on *CHROME* start
 chrome.runtime.onStartup.addListener(function () {
     checkContest();

@@ -1,3 +1,13 @@
+// acmicpc.net, codeforces.com
+// TODO: needs to be customizable with options
+const contestLists = {
+    'acmicpc': {
+        'url': 'https://www.acmicpc.net/contest/official/list',
+    },
+    'codeforces': {
+        'url': 'https://codeforces.com/contests',
+    }
+};
 const intervalQueues = [];
 
 const formatBeginAt = function (timestamp) {
@@ -22,7 +32,12 @@ const formatUntil = function (msTime) {
     let minute = Math.floor((sTime - day * 86400 - hour * 3600) / 60);
     let second = Math.floor((sTime - day * 86400 - hour * 3600 - minute * 60));
 
-    let fmt = `남은시간: ${day}일 ${hour}시간 ${minute}분 ${second}초`;
+    let fmt = '남은시간: ';
+    if (day != 0) fmt += `${day}일 `;
+    if (hour != 0) fmt += `${hour}시간 `;
+    if (minute != 0) fmt += `${minute}분 `;
+    if (second != 0) fmt += `${second}초 `;
+
     return fmt;
 };
 
@@ -34,11 +49,18 @@ const formatDuration = function (msTime) {
     let minute = Math.floor((sTime - day * 86400 - hour * 3600) / 60);
     let second = Math.floor((sTime - day * 86400 - hour * 3600 - minute * 60));
 
-    let fmt = `${day}일 ${hour}시간 ${minute}분 ${second}초`;
+    let fmt = '';
+    if (day != 0) fmt += `${day}일 `;
+    if (hour != 0) fmt += `${hour}시간 `;
+    if (minute != 0) fmt += `${minute}분 `;
+    if (second != 0) fmt += `${second}초 `;
+
     return fmt;
 };
 
 const renderContests = function (results) {
+    if (!results) return;
+
     let contestList = document.querySelector('.contestList');
 
     contestList.innerHTML = "";
@@ -56,6 +78,9 @@ const renderContests = function (results) {
         let iconImg = document.createElement('img');
         iconImg.classList.add('icon');
         iconImg.src = chrome.runtime.getURL(`images/logo/${item.siteName}.png`);
+        iconImg.onclick = function () {
+            chrome.tabs.update({ url: contestLists[item.siteName].url });
+        }
 
         let textWrapper = document.createElement('div');
         textWrapper.classList.add('wrap');
@@ -70,6 +95,7 @@ const renderContests = function (results) {
 
         let untilText = document.createElement('p');
         untilText.classList.add('until');
+        untilText.textContent = formatUntil(item.beginAt - new Date());
         let interval = setInterval(function () {
             let msTime = item.beginAt - new Date();
             if (msTime >= 0) untilText.textContent = formatUntil(msTime);
@@ -110,7 +136,6 @@ chrome.storage.sync.get(['contest'], function (value) {
     renderContests(results);
 });
 
-chrome.storage.onChanged.addListener(function (changes, namespaces) {
-    let results = changes['contest'].newValue;
-    renderContests(results);
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+    renderContests();
 });
