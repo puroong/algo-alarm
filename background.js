@@ -125,7 +125,8 @@ const checkContest = function () {
                     }
 
                     chrome.storage.sync.set({ 'contest': totalResults }, function () {
-                        console.log(totalResults + " are set");
+                        chrome.browserAction.setBadgeText({ text: Object.keys(totalResults).length.toString() });
+                        chrome.browserAction.setBadgeBackgroundColor({ color: '#F00' });
                     })
                 });
             } else {
