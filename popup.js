@@ -44,7 +44,9 @@ const renderContests = function (results) {
     contestList.innerHTML = "";
     for (let interval of intervalQueues) clearInterval(interval);
 
-    for (let item of results) {
+    for (let key of Object.keys(results)) {
+        let item = results[key];
+
         let newCard = document.createElement('div');
         newCard.classList.add('wrapper');
 

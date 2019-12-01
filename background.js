@@ -49,7 +49,7 @@ const parser = (function () {
                 contestList.push(nodeItem);
             }
 
-            let result = [];
+            let result = {};
             for (let contestItem of contestList) {
                 let datas = contestItem.querySelectorAll('td');
                 let name = datas[0].querySelector('a').innerText.trim();
@@ -57,12 +57,12 @@ const parser = (function () {
                 let endAt = new Date(kt2iso(datas[4].innerText)).getTime();
                 let duration = endAt - beginAt;
 
-                result.push({
+                result[name] = {
                     siteName: 'acmicpc',
                     name: name,
                     beginAt: beginAt,
                     duration: duration
-                });
+                };
             }
 
             return result;
@@ -74,7 +74,7 @@ const parser = (function () {
             let contestTable = htmlDoc.querySelector('div.datatable');
             let nodeList = contestTable.querySelectorAll('tr[data-contestid]');
 
-            let result = [];
+            let result = {};
             for (let nodeItem of nodeList) {
                 let datas = nodeItem.querySelectorAll('td');
                 let name = datas[0].innerText.trim();
@@ -85,12 +85,12 @@ const parser = (function () {
                 let beginAt = new Date(datas[2].innerText.split('UTC')[0]).getTime() + msTimeZoneOffset;
                 let duration = parseInt(datas[3].innerText.split(':')[0]) * 3600000;
 
-                result.push({
+                result[name] = {
                     siteName: 'codeforces',
                     name: name,
                     beginAt: beginAt,
                     duration: duration
-                });
+                };
             }
 
             return result;
@@ -112,17 +112,16 @@ const checkContest = function () {
  
                 chrome.storage.sync.get(['contest'], function (value) {
                     let today = new Date();
-                    value.contest = value.contest || [];
-                    let validContests = value.contest.filter(i => i.beginAt - today.getTime() > 0);
+                    value.contest = value.contest || {};
+                    let validContests = {};
+                    for (let key of Object.keys(value.contest)) {
+                        if (value.contest[key].beginAt - today.getTime() > 0) validContests[key] = value.contest[key];
+                    }
                     let newContests = results;
-                    let totalResults = validContests.slice();
+                    let totalResults = JSON.parse(JSON.stringify(validContests));
 
-                    for (let newContest of newContests) {
-                        let bNewContest = true;
-                        for (let validContest of validContests) {
-                            if (newContest.name == validContest.name) bNewContest = false;
-                        }
-                        if (bNewContest) totalResults.push(newContest);
+                    for (let key of Object.keys(newContests)) {
+                        if (totalResults[key] === undefined) totalResults[key] = newContests[key];
                     }
 
                     chrome.storage.sync.set({ 'contest': totalResults }, function () {
