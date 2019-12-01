@@ -121,7 +121,7 @@ const checkContest = function () {
                     let totalResults = JSON.parse(JSON.stringify(validContests));
 
                     for (let key of Object.keys(newContests)) {
-                        if (totalResults[key] === undefined) totalResults[key] = newContests[key];
+                        if (totalResults[key] === undefined && newContests[key].beginAt - today.getTime() >= 0) totalResults[key] = newContests[key];
                     }
 
                     chrome.storage.sync.set({ 'contest': totalResults });
@@ -137,9 +137,9 @@ const checkContest = function () {
 
 chrome.storage.onChanged.addListener(function (changes, namespaces) {
     let results = changes['contest'].newValue;
-    chrome.runtime.sendMessage(results);
     chrome.browserAction.setBadgeText({ text: Object.keys(results).length.toString() });
     chrome.browserAction.setBadgeBackgroundColor({ color: 'red' });
+    chrome.runtime.sendMessage(results);
 });
 
 // check contest on *CHROME* start
