@@ -3,7 +3,7 @@ const intervalQueues = [];
 const formatBeginAt = function (timestamp) {
     let date = new Date(timestamp);
     let year = date.getFullYear();
-    let month = date.getMonth()+1;
+    let month = date.getMonth() + 1;
     let day = date.getDate();
 
     let hour = date.getHours();
@@ -12,7 +12,7 @@ const formatBeginAt = function (timestamp) {
 
     let fmt = `시작일자: ${year}년 ${month}월 ${day}일  ${hour}시 ${minute}분 ${second}초`;
     return fmt;
-}
+};
 
 const formatUntil = function (msTime) {
     let sTime = Math.floor(msTime / 1000);
@@ -24,7 +24,7 @@ const formatUntil = function (msTime) {
 
     let fmt = `남은시간: ${day}일 ${hour}시간 ${minute}분 ${second}초`;
     return fmt;
-}
+};
 
 const formatDuration = function (msTime) {
     let sTime = Math.floor(msTime / 1000);
@@ -36,7 +36,7 @@ const formatDuration = function (msTime) {
 
     let fmt = `${day}일 ${hour}시간 ${minute}분 ${second}초`;
     return fmt;
-}
+};
 
 const renderContests = function (results) {
     let contestList = document.querySelector('.contestList');
@@ -56,7 +56,7 @@ const renderContests = function (results) {
         let iconImg = document.createElement('img');
         iconImg.classList.add('icon');
         iconImg.src = chrome.runtime.getURL(`images/logo/${item.siteName}.png`);
-        
+
         let textWrapper = document.createElement('div');
         textWrapper.classList.add('wrap');
 
@@ -91,7 +91,7 @@ const renderContests = function (results) {
 
         contestList.appendChild(newCard);
     }
-}
+};
 
 chrome.storage.sync.get(['contest'], function (value) {
     let results = value.contest || [];

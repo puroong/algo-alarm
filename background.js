@@ -9,7 +9,7 @@ const contestLists = [
         'url': 'https://x434f5253.herokuapp.com/https://codeforces.com/contests',
         'name': 'codeforces'
     }
-]
+];
 
 const kt2iso = function (kt) {
     let dateItems = kt.split(" ");
@@ -21,20 +21,20 @@ const kt2iso = function (kt) {
     let minute = undefined;
     let second = undefined;
 
-    if (dateItems[0]) year = dateItems[0].slice(0, dateItems[0].length-1);
+    if (dateItems[0]) year = dateItems[0].slice(0, dateItems[0].length - 1);
     if (dateItems[1]) month = dateItems[1].slice(0, dateItems[1].length - 1);
     if (dateItems[2]) day = dateItems[2].slice(0, dateItems[2].length - 1);
     if (dateItems[3]) hour = dateItems[3].slice(0, dateItems[3].length - 1);
     if (dateItems[4]) minute = dateItems[4].slice(0, dateItems[4].length - 1);
     if (dateItems[5]) second = dateItems[5].slice(0, dateItems[5].length - 1);
-    
+
     let isoFmt;
     if (second) isoFmt = `${year}-${month}-${day} ${hour}:${minute}:${second}`;
     if (minute) isoFmt = `${year}-${month}-${day} ${hour}:${minute}:00`;
     if (hour) isoFmt = `${year}-${month}-${day} ${hour}:00:00`;
 
     return isoFmt;
-}
+};
 
 const parser = (function () {
     return {
@@ -96,12 +96,12 @@ const parser = (function () {
             return result;
         }
     }
-})()
+})();
 
 const parseContest = function (siteName, html) {
     let results = parser[siteName](html);
     return results;
-}
+};
 
 const checkContest = function () {
     for (let contest of contestLists) {
@@ -109,7 +109,7 @@ const checkContest = function () {
         xhr.onreadystatechange = function () {
             if (this.readyState === 4 && this.status === 200) {
                 let results = parseContest(contest.name, this.responseText);
- 
+
                 chrome.storage.sync.get(['contest'], function (value) {
                     let today = new Date();
                     value.contest = value.contest || {};
@@ -125,7 +125,7 @@ const checkContest = function () {
                     }
 
                     chrome.storage.sync.set({ 'contest': totalResults }, function () {
-                        console.log(totalResults+" are set");
+                        console.log(totalResults + " are set");
                     })
                 });
             } else {
@@ -135,7 +135,7 @@ const checkContest = function () {
         xhr.open('GET', contest.url);
         xhr.send();
     }
-}
+};
 
 // check contest on *CHROME* start
 chrome.runtime.onStartup.addListener(function () {
@@ -144,4 +144,4 @@ chrome.runtime.onStartup.addListener(function () {
 // check contest after install
 chrome.runtime.onInstalled.addListener(function () {
     checkContest();
-})
+});
