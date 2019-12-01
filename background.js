@@ -124,9 +124,7 @@ const checkContest = function () {
                         if (totalResults[key] === undefined) totalResults[key] = newContests[key];
                     }
 
-                    chrome.storage.sync.set({ 'contest': totalResults }, function () {
-                        console.log(totalResults + " are set");
-                    })
+                    chrome.storage.sync.set({ 'contest': totalResults });
                 });
             } else {
                 console.log(this.statusText);

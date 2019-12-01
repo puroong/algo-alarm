@@ -71,7 +71,19 @@ const renderContests = function (results) {
         let untilText = document.createElement('p');
         untilText.classList.add('until');
         let interval = setInterval(function () {
-            untilText.textContent = formatUntil(item.beginAt - new Date());
+            let msTime = item.beginAt - new Date();
+            if (msTime >= 0) untilText.textContent = formatUntil(msTime);
+            else {
+                chrome.storage.sync.get(['contest'], function (value) {
+                    delete value.contest[item.name];
+                    chrome.storage.sync.set({ 'contest': value.contest });
+                });
+                let idx;
+                if (idx = intervalQueues.indexOf(this) !== -1) {
+                    intervalQueues.splice(idx);
+                    clearInterval(this);
+                }
+            }
         }, 1000);
         intervalQueues.push(interval);
 
@@ -94,7 +106,7 @@ const renderContests = function (results) {
 };
 
 chrome.storage.sync.get(['contest'], function (value) {
-    let results = value.contest || [];
+    let results = value.contest || {};
     renderContests(results);
 });
 
