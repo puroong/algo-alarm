@@ -124,10 +124,7 @@ const checkContest = function () {
                         if (totalResults[key] === undefined) totalResults[key] = newContests[key];
                     }
 
-                    chrome.storage.sync.set({ 'contest': totalResults }, function () {
-                        chrome.browserAction.setBadgeText({ text: Object.keys(totalResults).length.toString() });
-                        chrome.browserAction.setBadgeBackgroundColor({ color: '#F00' });
-                    })
+                    chrome.storage.sync.set({ 'contest': totalResults });
                 });
             } else {
                 console.log(this.statusText);
@@ -137,6 +134,13 @@ const checkContest = function () {
         xhr.send();
     }
 };
+
+chrome.storage.onChanged.addListener(function (changes, namespaces) {
+    let results = changes['contest'].newValue;
+    chrome.runtime.sendMessage(results);
+    chrome.browserAction.setBadgeText({ text: Object.keys(results).length.toString() });
+    chrome.browserAction.setBadgeBackgroundColor({ color: 'red' });
+});
 
 // check contest on *CHROME* start
 chrome.runtime.onStartup.addListener(function () {

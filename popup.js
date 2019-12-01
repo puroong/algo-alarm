@@ -59,6 +59,8 @@ const formatDuration = function (msTime) {
 };
 
 const renderContests = function (results) {
+    if (!results) return;
+
     let contestList = document.querySelector('.contestList');
 
     contestList.innerHTML = "";
@@ -121,7 +123,6 @@ chrome.storage.sync.get(['contest'], function (value) {
     renderContests(results);
 });
 
-chrome.storage.onChanged.addListener(function (changes, namespaces) {
-    let results = changes['contest'].newValue;
-    renderContests(results);
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+    renderContests();
 });
