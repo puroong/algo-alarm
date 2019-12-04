@@ -131,10 +131,14 @@ const updateUntil = function (contest) {
 
 STORAGE.getStorage(CONSTANTS.TYPELOCAL, [CONSTANTS.CONTESTS, CONSTANTS.BADGECOLOR], function (obj) {
     const contests = obj[CONSTANTS.CONTESTS] || {};
-    const nContests = Object.keys(contests).length.toString();
+    const contestKeys = Object.keys(contests);
+    contestKeys.forEach(k => contests[k] = CONTEST.createContest(contests[k]));
+
     const badgeColor = obj[CONSTANTS.BADGECOLOR];
 
-    chrome.browserAction.setBadgeText({ text: nContests });
+    const nOnGoing = Object.keys(contestKeys.filter(k => contests[k].isOnGoing())).length.toString();
+    const nComing = Object.keys(contestKeys.filter(k => contests[k].isComing())).length.toString();
+    chrome.browserAction.setBadgeText({ text: `${nComing}/${nOnGoing}` });
     chrome.browserAction.setBadgeBackgroundColor({ color: badgeColor });
 
     renderContests(obj[CONSTANTS.CONTESTS]);

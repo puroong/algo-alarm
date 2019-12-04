@@ -11,17 +11,18 @@ chrome.storage.onChanged.addListener(function (changes, namespaces) {
         chrome.browserAction.setBadgeBackgroundColor({ color: badgeColor });
     }
     if (contests) {
-        const nContests = Object.keys(contests).length.toString();
-        chrome.browserAction.setBadgeText({ text: nContests });
+        const contestKeys = Object.keys(contests);
+        contestKeys.forEach(k => contests[k] = CONTEST.createContest(contests[k]));
+
+        const nOnGoing = Object.keys(contestKeys.filter(k => contests[k].isOnGoing())).length.toString();
+        const nComing = Object.keys(contestKeys.filter(k => contests[k].isComing())).length.toString();
+        chrome.browserAction.setBadgeText({ text: `${nComing}/${nOnGoing}` });
         chrome.runtime.sendMessage(MESSAGE.createMessage({ command: "renderContests", data: contests}));
 
         intervalQueue.forEach(interval => {
             clearInterval(interval);
         })
         intervalQueue.length = 0;
-
-        const contestKeys = Object.keys(contests);
-        contestKeys.forEach(k => contests[k] = CONTEST.createContest(contests[k]));
 
         for (let key of contestKeys) {
             const interval = setInterval(function () {
