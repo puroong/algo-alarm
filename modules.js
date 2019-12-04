@@ -138,13 +138,13 @@ const PARSER = (function () {
                 let endAt = new Date(TIMEFORMATTER.acmFmt2Iso(datas[4].innerText)).getTime();
                 let duration = endAt - beginAt;
 
-                result[name] = {
+                result[name] = CONTEST.createContest({
                     siteName: 'acmicpc',
                     siteUrl: 'https://www.acmicpc.net/contest/official/list',
                     name: name,
                     beginAt: beginAt,
                     duration: duration
-                };
+                });
             }
 
             return result;
@@ -167,13 +167,13 @@ const PARSER = (function () {
                 let beginAt = new Date(datas[2].innerText.split('UTC')[0]).getTime() + msTimeZoneOffset;
                 let duration = parseInt(datas[3].innerText.split(':')[0]) * 3600000;
 
-                result[name] = {
+                result[name] = CONTEST.createContest({
                     siteName: 'codeforces',
                     siteUrl: 'https://codeforces.com/contests',
                     name: name,
                     beginAt: beginAt,
                     duration: duration
-                };
+                });
             }
 
             return result;
@@ -244,11 +244,37 @@ const CRAWLER = (function () {
 const MESSAGE = (function () {
     return {
         _Message: function (command, data) {
+            if (!command || !data) throw new Error('Invaild Arguments');
             this.command = command;
             this.data = data;
         },
-        createMessage: function (command, data) {
+        createMessage: function (obj) {
+            const command = obj.command;
+            const data = obj.data;
+
             return new this._Message(command, data);
+        }
+    }
+})();
+
+const CONTEST = (function () {
+    return {
+        _Contest: function (siteName, siteUrl, name, beginAt, duration) {
+            if (!siteName || !siteUrl || !name || !beginAt || !duration) throw new Error('Invalid Arguments');
+            this.siteName = siteName;
+            this.siteUrl = siteUrl;
+            this.name = name;
+            this.beginAt = beginAt;
+            this.duration = duration;
+        },
+        createContest: function (obj) {
+            const siteName = obj.siteName;
+            const siteUrl = obj.siteUrl;
+            const name = obj.name;
+            const beginAt = obj.beginAt;
+            const duration = obj.duration;
+
+            return new this._Contest(siteName, siteUrl, name, beginAt, duration);
         }
     }
 })();

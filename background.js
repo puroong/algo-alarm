@@ -13,7 +13,7 @@ chrome.storage.onChanged.addListener(function (changes, namespaces) {
     if (contests) {
         const nContests = Object.keys(contests).length.toString();
         chrome.browserAction.setBadgeText({ text: nContests });
-        chrome.runtime.sendMessage(MESSAGE.createMessage("renderContests", contests));
+        chrome.runtime.sendMessage(MESSAGE.createMessage({ command: "renderContests", data: contests}));
 
         intervalQueue.forEach(interval => {
             clearInterval(interval);
@@ -24,7 +24,7 @@ chrome.storage.onChanged.addListener(function (changes, namespaces) {
         for (let key of contestKeys) {
             const interval = setInterval(function () {
                 const now = new Date();
-                chrome.runtime.sendMessage(MESSAGE.createMessage("updateUntil", contests[key]));
+                chrome.runtime.sendMessage(MESSAGE.createMessage({ command: "updateUntil", data: contests[key]}));
 
                 if (contests[key].beginAt - now.getTime() < 0) {
                     delete contests[key];
