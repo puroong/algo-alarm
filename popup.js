@@ -5,7 +5,10 @@ const renderContests = function (results) {
 
     contestList.innerHTML = "";
 
-    for (let key of Object.keys(results)) {
+    let keys = Object.keys(results);
+    let sortedKeys = keys.sort((a, b) => results[a].beginAt - results[b].beginAt);
+
+    for (let key of sortedKeys) {
         let item = results[key];
 
         let newCard = document.createElement('div');
