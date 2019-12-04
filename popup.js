@@ -1,3 +1,103 @@
+const createComingContestNode = function (contest) {
+    let node = document.createElement('div');
+    node.classList.add('wrapper');
+
+    let iconWrapper = document.createElement('div');
+    iconWrapper.classList.add('wrap');
+
+    let iconImg = document.createElement('img');
+    iconImg.classList.add('icon');
+    iconImg.src = chrome.runtime.getURL(`images/logo/${contest.siteName}.png`);
+    iconImg.onclick = function () {
+        chrome.tabs.update({ url: contest.siteUrl });
+    }
+
+    let textWrapper = document.createElement('div');
+    textWrapper.classList.add('wrap');
+
+    let titleText = document.createElement('p');
+    titleText.classList.add('title');
+    titleText.textContent = contest.name;
+
+    let beginAtText = document.createElement('p');
+    beginAtText.classList.add('beginAt');
+    beginAtText.textContent = TIMEFORMATTER.beginAt2Readable(contest.beginAt);
+
+    let untilText = document.createElement('p');
+    untilText.classList.add('until');
+    untilText.setAttribute('data-contestname', contest.name);
+    untilText.textContent = TIMEFORMATTER.until2Readable(contest.beginAt - new Date());
+
+    let durationText = document.createElement('p');
+    durationText.classList.add('duration');
+    durationText.textContent = TIMEFORMATTER.duration2Readable(contest.duration);
+
+    iconWrapper.appendChild(iconImg);
+
+    textWrapper.appendChild(titleText);
+    textWrapper.appendChild(beginAtText);
+    textWrapper.appendChild(untilText);
+    textWrapper.appendChild(durationText);
+
+    node.appendChild(iconWrapper);
+    node.appendChild(textWrapper);
+
+    return node;
+}
+
+const createOnGoingContestNode = function (contest) {
+    let node = document.createElement('div');
+    node.classList.add('wrapper');
+
+    let iconWrapper = document.createElement('div');
+    iconWrapper.classList.add('wrap');
+
+    let iconImg = document.createElement('img');
+    iconImg.classList.add('icon');
+    iconImg.src = chrome.runtime.getURL(`images/logo/${contest.siteName}.png`);
+    iconImg.onclick = function () {
+        chrome.tabs.update({ url: contest.siteUrl });
+    }
+
+    let textWrapper = document.createElement('div');
+    textWrapper.classList.add('wrap');
+
+    let titleText = document.createElement('p');
+    titleText.classList.add('title');
+    titleText.textContent = contest.name;
+
+    let tagSpan = document.createElement('span');
+    tagSpan.classList.add('ongoing');
+    tagSpan.textContent = '진행 중';
+
+    let beginAtText = document.createElement('p');
+    beginAtText.classList.add('beginAt');
+    beginAtText.textContent = TIMEFORMATTER.beginAt2Readable(contest.beginAt);
+
+    let untilText = document.createElement('p');
+    untilText.classList.add('until');
+    untilText.setAttribute('data-contestname', contest.name);
+    untilText.textContent = TIMEFORMATTER.until2Readable(contest.endAt - new Date());
+
+    let durationText = document.createElement('p');
+    durationText.classList.add('duration');
+    durationText.textContent = TIMEFORMATTER.duration2Readable(contest.duration);
+
+    iconWrapper.appendChild(iconImg);
+
+    titleText.appendChild(tagSpan);
+
+    textWrapper.appendChild(titleText);
+    textWrapper.appendChild(beginAtText);
+    textWrapper.appendChild(untilText);
+    textWrapper.appendChild(durationText);
+
+    node.appendChild(iconWrapper);
+    node.appendChild(textWrapper);
+
+    return node;
+}
+
 const renderContests = function (results) {
     if (!results) return;
 
@@ -6,63 +106,27 @@ const renderContests = function (results) {
     contestList.innerHTML = "";
 
     let keys = Object.keys(results);
+    keys.forEach(k => results[k] = CONTEST.createContest(results[k]));
     let sortedKeys = keys.sort((a, b) => results[a].beginAt - results[b].beginAt);
 
     for (let key of sortedKeys) {
         let item = results[key];
+        let node = null;
 
-        let newCard = document.createElement('div');
-        newCard.classList.add('wrapper');
+        if (item.isComing()) node = createComingContestNode(item);
+        else if (item.isOnGoing()) node = createOnGoingContestNode(item);
 
-        let iconWrapper = document.createElement('div');
-        iconWrapper.classList.add('wrap');
-
-        let iconImg = document.createElement('img');
-        iconImg.classList.add('icon');
-        iconImg.src = chrome.runtime.getURL(`images/logo/${item.siteName}.png`);
-        iconImg.onclick = function () {
-            chrome.tabs.update({ url: item.siteUrl });
-        }
-
-        let textWrapper = document.createElement('div');
-        textWrapper.classList.add('wrap');
-
-        let titleText = document.createElement('p');
-        titleText.classList.add('title');
-        titleText.textContent = item.name;
-
-        let beginAtText = document.createElement('p');
-        beginAtText.classList.add('beginAt');
-        beginAtText.textContent = TIMEFORMATTER.beginAt2Readable(item.beginAt);
-
-        let untilText = document.createElement('p');
-        untilText.classList.add('until');
-        untilText.setAttribute('data-contestname', item.name);
-        untilText.textContent = TIMEFORMATTER.until2Readable(item.beginAt - new Date());
-
-        let durationText = document.createElement('p');
-        durationText.classList.add('duration');
-        durationText.textContent = TIMEFORMATTER.duration2Readable(item.duration);
-
-        iconWrapper.appendChild(iconImg);
-
-        textWrapper.appendChild(titleText);
-        textWrapper.appendChild(beginAtText);
-        textWrapper.appendChild(untilText);
-        textWrapper.appendChild(durationText);
-
-        newCard.appendChild(iconWrapper);
-        newCard.appendChild(textWrapper);
-
-        contestList.appendChild(newCard);
+        if(node !== null) contestList.appendChild(node);
     }
 };
 
 const updateUntil = function (contest) {
     const now = new Date();
     const untilText = document.querySelector('p.until[data-contestname="' + contest.name + '"]');
+    const c = CONTEST.createContest(contest);
 
-    untilText.textContent = TIMEFORMATTER.until2Readable(contest.beginAt - now.getTime());
+    if (c.isComing()) untilText.textContent = TIMEFORMATTER.until2Readable(contest.beginAt - now.getTime());
+    else if (c.isOnGoing()) untilText.textContent = TIMEFORMATTER.until2Readable(contest.endAt - now.getTime());
 }
 
 STORAGE.getStorage(CONSTANTS.TYPELOCAL, [CONSTANTS.CONTESTS, CONSTANTS.BADGECOLOR], function (obj) {

@@ -278,9 +278,13 @@ const CONTEST = (function () {
         return this.endAt - new Date().getTime() < 0;
     };
 
-    _Contest.prototype.isStarted = function () {
-        return this.beginAt - new Date().getTime() < 0;
+    _Contest.prototype.isOnGoing = function () {
+        return this.beginAt - new Date().getTime() < 0 && this.endAt - new Date() > 0;
     };
+
+    _Contest.prototype.isComing = function () {
+        return this.beginAt - new Date().getTime() > 0;
+    }
 
     return {
         createContest: function (obj) {
