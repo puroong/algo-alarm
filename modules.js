@@ -241,7 +241,14 @@ const CRAWLER = (function () {
     }
 })();
 
-const MESSAGE = function (command, data) {
-    this.command = command;
-    this.data = data;
-}
+const MESSAGE = (function () {
+    return {
+        _Message: function (command, data) {
+            this.command = command;
+            this.data = data;
+        },
+        createMessage: function (command, data) {
+            return new this._Message(command, data);
+        }
+    }
+})();
