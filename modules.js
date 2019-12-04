@@ -123,7 +123,7 @@ const PARSER = (function () {
             let domParser = new DOMParser();
             let htmlDoc = domParser.parseFromString(html, 'text/html');
 
-            let nodeList = htmlDoc.querySelectorAll('tr.info');
+            let nodeList = htmlDoc.querySelectorAll('tr.info,tr.success');
             let contestList = [];
 
             for (let nodeItem of nodeList) {
@@ -143,6 +143,7 @@ const PARSER = (function () {
                     siteUrl: 'https://www.acmicpc.net/contest/official/list',
                     name: name,
                     beginAt: beginAt,
+                    endAt: endAt,
                     duration: duration
                 });
             }
@@ -166,12 +167,14 @@ const PARSER = (function () {
                 let msTimeZoneOffset = (-180 - new Date().getTimezoneOffset()) * 60 * 1000;
                 let beginAt = new Date(datas[2].innerText.split('UTC')[0]).getTime() + msTimeZoneOffset;
                 let duration = parseInt(datas[3].innerText.split(':')[0]) * 3600000;
+                let endAt = beginAt + duration;
 
                 result[name] = CONTEST.createContest({
                     siteName: 'codeforces',
                     siteUrl: 'https://codeforces.com/contests',
                     name: name,
                     beginAt: beginAt,
+                    endAt: endAt,
                     duration: duration
                 });
             }
@@ -209,16 +212,18 @@ const CRAWLER = (function () {
 
                                 let curContests = obj[CONSTANTS.CONTESTS] || {};
                                 let curContestsKeys = Object.keys(curContests);
+                                curContestsKeys.forEach(k => curContests[k] = CONTEST.createContest(curContests[k]));
+
                                 let validContests = {};
 
                                 for (let key of curContestsKeys) {
-                                    if (curContests[key].beginAt - today.getTime() > 0) validContests[key] = curContests[key];
+                                    if (!curContests[key].isOver()) validContests[key] = curContests[key];
                                 }
 
                                 let totalContests = JSON.parse(JSON.stringify(validContests));
                                 let newContestKeys = Object.keys(newContests);
                                 for (let key of newContestKeys) {
-                                    if (totalContests[key] === undefined && newContests[key].beginAt - today.getTime() > 0) totalContests[key] = newContests[key];
+                                    if (totalContests[key] === undefined && !newContests[key].isOver()) totalContests[key] = newContests[key];
                                 }
 
                                 let totalContestItems = {
@@ -242,39 +247,51 @@ const CRAWLER = (function () {
 })();
 
 const MESSAGE = (function () {
+    let _Message = function (command, data) {
+        if (!command || !data) throw new Error('Invaild Arguments');
+        this.command = command;
+        this.data = data;
+    };
+
     return {
-        _Message: function (command, data) {
-            if (!command || !data) throw new Error('Invaild Arguments');
-            this.command = command;
-            this.data = data;
-        },
         createMessage: function (obj) {
             const command = obj.command;
             const data = obj.data;
 
-            return new this._Message(command, data);
+            return new _Message(command, data);
         }
     }
 })();
 
 const CONTEST = (function () {
+    let _Contest = function (siteName, siteUrl, name, beginAt, endAt, duration) {
+        if (!siteName || !siteUrl || !name || !beginAt || !endAt || !duration) throw new Error('Invalid Arguments');
+        this.siteName = siteName;
+        this.siteUrl = siteUrl;
+        this.name = name;
+        this.beginAt = beginAt;
+        this.endAt = endAt;
+        this.duration = duration;
+    }
+
+    _Contest.prototype.isOver = function () {
+        return this.endAt - new Date().getTime() < 0;
+    };
+
+    _Contest.prototype.isStarted = function () {
+        return this.beginAt - new Date().getTime() < 0;
+    };
+
     return {
-        _Contest: function (siteName, siteUrl, name, beginAt, duration) {
-            if (!siteName || !siteUrl || !name || !beginAt || !duration) throw new Error('Invalid Arguments');
-            this.siteName = siteName;
-            this.siteUrl = siteUrl;
-            this.name = name;
-            this.beginAt = beginAt;
-            this.duration = duration;
-        },
         createContest: function (obj) {
             const siteName = obj.siteName;
             const siteUrl = obj.siteUrl;
             const name = obj.name;
             const beginAt = obj.beginAt;
+            const endAt = obj.endAt;
             const duration = obj.duration;
 
-            return new this._Contest(siteName, siteUrl, name, beginAt, duration);
+            return new _Contest(siteName, siteUrl, name, beginAt, endAt, duration);
         }
     }
 })();

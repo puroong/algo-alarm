@@ -21,12 +21,14 @@ chrome.storage.onChanged.addListener(function (changes, namespaces) {
         intervalQueue.length = 0;
 
         const contestKeys = Object.keys(contests);
+        contestKeys.forEach(k => contests[k] = CONTEST.createContest(contests[k]));
+
         for (let key of contestKeys) {
             const interval = setInterval(function () {
                 const now = new Date();
                 chrome.runtime.sendMessage(MESSAGE.createMessage({ command: "updateUntil", data: contests[key]}));
 
-                if (contests[key].beginAt - now.getTime() < 0) {
+                if (contests[key].isOver()) {
                     delete contests[key];
                     clearInterval(interval);
                     STORAGE.setStorage(CONSTANTS.TYPELOCAL, { [CONSTANTS.CONTESTS]: contests, function() { } });
