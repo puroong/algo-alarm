@@ -7,6 +7,45 @@ import Crawler from './modules/crawler';
 
 const intervalQueue: number[] = [];
 
+const setTimeIntervals = function (contests: ContestMap) {
+    intervalQueue.forEach(interval => {
+        clearInterval(interval);
+    })
+    intervalQueue.length = 0;
+
+    const contestKeys = Object.keys(contests);
+    for (let key of contestKeys) {
+        const interval: number = setInterval(function () {
+            const now: Date = new Date();
+            chrome.runtime.sendMessage(MessageFactory.createMessage(Constant.MessageType.UPDATETIME, contests[key]));
+
+            if (contests[key].isOver()) {
+                delete contests[key];
+                clearInterval(interval);
+                Storage.setStorage(Constant.StorageType.LOCAL, { [Constant.StorageKey.CONTESTS]: contests }, function() { });
+            }
+        }, 1000);
+    }
+}
+
+chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
+    if(msg.command == Constant.MessageType.SETTIMEINTERVAL) {
+        const rawContests: any = msg.data;
+        const contestKeys: string[] = Object.keys(rawContests);
+        let contests: ContestMap = {};
+        contestKeys.forEach(key => contests[key] = new Contest(
+            rawContests[key].siteName,
+            rawContests[key].siteUrl,
+            rawContests[key].name,
+            rawContests[key].beginAt,
+            rawContests[key].endAt,
+            rawContests[key].duration
+        ));
+
+        setTimeIntervals(contests);
+    }
+});
+
 chrome.storage.onChanged.addListener(function (changes: any, namespaces: any) {
     let rawContests: any, rawJudges: any, badgeColor: string;
 
@@ -38,24 +77,8 @@ chrome.storage.onChanged.addListener(function (changes: any, namespaces: any) {
         const nComing: string = Object.keys(contestKeys.filter(key => contests[key].isComing())).length.toString();
         chrome.browserAction.setBadgeText({ text: `${nComing}/${nOnGoing}` });
         chrome.runtime.sendMessage(MessageFactory.createMessage(Constant.MessageType.RENDERCONTESTS, contests));
-
-        intervalQueue.forEach(interval => {
-            clearInterval(interval);
-        })
-        intervalQueue.length = 0;
-
-        for (let key of contestKeys) {
-            const interval: number = setInterval(function () {
-                const now: Date = new Date();
-                chrome.runtime.sendMessage(MessageFactory.createMessage(Constant.MessageType.UPDATETIME, contests[key]));
-
-                if (contests[key].isOver()) {
-                    delete contests[key];
-                    clearInterval(interval);
-                    Storage.setStorage(Constant.StorageType.LOCAL, { [Constant.StorageKey.CONTESTS]: contests }, function() { });
-                }
-            }, 1000);
-        }
+        
+        setTimeIntervals(contests);
     }
 });
 

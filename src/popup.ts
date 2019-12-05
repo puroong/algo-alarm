@@ -3,6 +3,7 @@ import Storage from "./modules/storage";
 import Contest from "./modules/types/contest";
 import TimeFormatter from "./modules/timeFormatter";
 import ContestMap from "./modules/types/contestMap";
+import MessageFactory from './modules/messages/messageFactory';
 
 const createComingContestNode = function (contest: Contest) {
     let node = document.createElement('div');
@@ -156,6 +157,7 @@ Storage.getStorage(Constant.StorageType.LOCAL, [Constant.StorageKey.CONTESTS, Co
     chrome.browserAction.setBadgeBackgroundColor({ color: badgeColor });
 
     renderContests(contests);
+    chrome.runtime.sendMessage(MessageFactory.createMessage(Constant.MessageType.SETTIMEINTERVAL, contests));
 });
 
 chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
