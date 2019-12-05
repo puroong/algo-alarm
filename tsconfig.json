@@ -1,0 +1,16 @@
+{
+  "include": [
+    "./src/modules/**/*"
+  ],
+  "exclude": [
+  ],
+  "compilerOptions": {
+    "outDir": "dist/",
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "target": "es6",
+    "types": [
+      "chrome"
+    ]
+  }
+}

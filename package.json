@@ -1,0 +1,29 @@
+{
+  "name": "algo-alarm",
+  "version": "0.0.1",
+  "description": "chrome extension that gives notice of algorithm contests on acmicpc.net, codeforces.com",
+  "main": "webpack.config.js",
+  "scripts": {
+    "start": "webpack -p",
+    "dev": "webpack --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/puroong/algo-alarm.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/puroong/algo-alarm/issues"
+  },
+  "homepage": "https://github.com/puroong/algo-alarm#readme",
+  "devDependencies": {
+    "@types/chrome": "0.0.91",
+    "source-map-loader": "^0.2.4",
+    "ts-loader": "^6.2.1",
+    "typescript": "^3.7.3",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10"
+  }
+}
