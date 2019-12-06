@@ -23,8 +23,8 @@ class AcmParser implements Parser {
         for (let contestElem of contestElemList) {
             let datas = contestElem.querySelectorAll('td');
             let name: string = datas[0].querySelector('a').innerText.trim();
-            let beginAt: number = new Date(TimeFormatter.acmFmt2Iso(datas[3].innerText)).getTime();
-            let endAt: number = new Date(TimeFormatter.acmFmt2Iso(datas[4].innerText)).getTime();
+            let beginAt: number = Date.parse(TimeFormatter.acmFmt2Iso(datas[3].innerText));
+            let endAt: number = Date.parse(TimeFormatter.acmFmt2Iso(datas[4].innerText));
             let duration: number = endAt - beginAt;
 
             result[name] = new Contest(

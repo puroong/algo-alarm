@@ -2,9 +2,12 @@ import Message from './message';
 import Constant from '../constant';
 import Contest from '../types/contest';
 
-class UpdateTimeMessage extends Message{
+class UpdateTimeMessage implements Message{
+    command: string;
+    data: any;
     constructor(data: Contest) {
-        super(Constant.MessageType.UPDATETIME, data);
+        this.command = Constant.MessageType.UPDATETIME;
+        this.data = data;
     }
 }
 

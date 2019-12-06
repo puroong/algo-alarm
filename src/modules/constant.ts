@@ -7,7 +7,8 @@ const StorageKey = {
 enum MessageType {
     RENDERCONTESTS = 'renderContests',
     UPDATETIME = 'updateTime',
-    SETTIMEINTERVAL = 'setInterval'
+    SETTIMEINTERVAL = 'setInterval',
+    UNSETTIMEINTERVAL = 'unsetInterval'
 }
 enum JudgeName {
     ACMICPC = 'acmicpc',

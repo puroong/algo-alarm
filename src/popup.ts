@@ -3,7 +3,8 @@ import Storage from "./modules/storage";
 import Contest from "./modules/types/contest";
 import TimeFormatter from "./modules/timeFormatter";
 import ContestMap from "./modules/types/contestMap";
-import MessageFactory from './modules/messages/messageFactory';
+import MessageFactory from "./modules/messages/messageFactory";
+import Message from "./modules/messages/message";
 
 const createComingContestNode = function (contest: Contest) {
     let node = document.createElement('div');
@@ -33,7 +34,7 @@ const createComingContestNode = function (contest: Contest) {
     let untilText = document.createElement('p');
     untilText.classList.add('until');
     untilText.setAttribute('data-contestname', contest.name);
-    untilText.textContent = TimeFormatter.until2Readable(contest.beginAt - new Date().getTime());
+    untilText.textContent = TimeFormatter.until2Readable(contest.beginAt - Date.now());
 
     let durationText = document.createElement('p');
     durationText.classList.add('duration');
@@ -84,7 +85,7 @@ const createOnGoingContestNode = function (contest: Contest) {
     let untilText = document.createElement('p');
     untilText.classList.add('until');
     untilText.setAttribute('data-contestname', contest.name);
-    untilText.textContent = TimeFormatter.until2Readable(contest.endAt - new Date().getTime());
+    untilText.textContent = TimeFormatter.until2Readable(contest.endAt - Date.now());
 
     let durationText = document.createElement('p');
     durationText.classList.add('duration');
@@ -106,8 +107,6 @@ const createOnGoingContestNode = function (contest: Contest) {
 }
 
 const renderContests = function (contests: ContestMap) {
-    console.log('render contests');
-    console.log(contests);
     if (contests === undefined) return;
 
     let contestList = document.querySelector('.contestList');
@@ -129,12 +128,47 @@ const renderContests = function (contests: ContestMap) {
 };
 
 const updateUntil = function (contest: Contest) {
-    const now = new Date();
     const untilText = document.querySelector('p.until[data-contestname="' + contest.name + '"]');
 
-    if (contest.isComing()) untilText.textContent = TimeFormatter.until2Readable(contest.beginAt - now.getTime());
-    else if (contest.isOnGoing()) untilText.textContent = TimeFormatter.until2Readable(contest.endAt - now.getTime());
+    if (contest.isComing()) untilText.textContent = TimeFormatter.until2Readable(contest.beginAt - Date.now());
+    else if (contest.isOnGoing()) untilText.textContent = TimeFormatter.until2Readable(contest.endAt - Date.now());
 }
+
+
+const port = chrome.runtime.connect({
+    name: 'algo-alarm'
+});
+
+port.onMessage.addListener(function (msg: Message) {
+    if (msg.command == Constant.MessageType.RENDERCONTESTS) {
+        const rawContests: any = msg.data;
+        const contestKeys: string[] = Object.keys(rawContests);
+        let contests: ContestMap = {};
+        contestKeys.forEach(key => contests[key] = new Contest(
+            rawContests[key].siteName,
+            rawContests[key].siteUrl,
+            rawContests[key].name,
+            rawContests[key].beginAt,
+            rawContests[key].endAt,
+            rawContests[key].duration
+        ));
+
+        renderContests(contests);
+    }
+    else if (msg.command == Constant.MessageType.UPDATETIME) {
+        const rawContest: any = msg.data;
+        const contest = new Contest(
+            rawContest.siteName,
+            rawContest.siteUrl,
+            rawContest.name,
+            rawContest.beginAt,
+            rawContest.endAt,
+            rawContest.duration
+        );
+
+        updateUntil(contest);
+    }
+})
 
 Storage.getStorage(Constant.StorageType.LOCAL, [Constant.StorageKey.CONTESTS, Constant.StorageKey.BADGECOLOR], function (obj: any) {
     const rawContests: any = obj[Constant.StorageKey.CONTESTS] || {};
@@ -157,42 +191,5 @@ Storage.getStorage(Constant.StorageType.LOCAL, [Constant.StorageKey.CONTESTS, Co
     chrome.browserAction.setBadgeBackgroundColor({ color: badgeColor });
 
     renderContests(contests);
-    chrome.runtime.sendMessage(MessageFactory.createMessage(Constant.MessageType.SETTIMEINTERVAL, contests));
-});
-
-chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
-    if (msg.command == Constant.MessageType.RENDERCONTESTS) {
-        const rawContests: any = msg.data;
-        const contestKeys: string[] = Object.keys(rawContests);
-        let contests: ContestMap = {};
-        contestKeys.forEach(key => contests[key] = new Contest(
-            rawContests[key].siteName,
-            rawContests[key].siteUrl,
-            rawContests[key].name,
-            rawContests[key].beginAt,
-            rawContests[key].endAt,
-            rawContests[key].duration
-        ));
-
-        console.log('msg: ')
-        console.log(msg);
-        console.log('rawContests: ')
-        console.log(rawContests)
-        console.log('contests: ')
-        console.log(contests);
-        renderContests(contests);
-    }
-    else if (msg.command == Constant.MessageType.UPDATETIME) {
-        const rawContest: any = msg.data;
-        const contest = new Contest(
-            rawContest.siteName,
-            rawContest.siteUrl,
-            rawContest.name,
-            rawContest.beginAt,
-            rawContest.endAt,
-            rawContest.duration
-        );
-
-        updateUntil(contest);
-    }
+    port.postMessage(MessageFactory.createMessage(Constant.MessageType.SETTIMEINTERVAL, contests));
 });
