@@ -3,7 +3,6 @@ import Storage from "./modules/storage";
 import Contest from "./modules/types/contest";
 import TimeFormatter from "./modules/timeFormatter";
 import ContestMap from "./modules/types/contestMap";
-import MessageFactory from './modules/messages/messageFactory';
 
 const createComingContestNode = function (contest: Contest) {
     let node = document.createElement('div');
@@ -33,7 +32,7 @@ const createComingContestNode = function (contest: Contest) {
     let untilText = document.createElement('p');
     untilText.classList.add('until');
     untilText.setAttribute('data-contestname', contest.name);
-    untilText.textContent = TimeFormatter.until2Readable(contest.beginAt - new Date().getTime());
+    untilText.textContent = TimeFormatter.until2Readable(contest.beginAt - Date.now());
 
     let durationText = document.createElement('p');
     durationText.classList.add('duration');
@@ -84,7 +83,7 @@ const createOnGoingContestNode = function (contest: Contest) {
     let untilText = document.createElement('p');
     untilText.classList.add('until');
     untilText.setAttribute('data-contestname', contest.name);
-    untilText.textContent = TimeFormatter.until2Readable(contest.endAt - new Date().getTime());
+    untilText.textContent = TimeFormatter.until2Readable(contest.endAt - Date.now());
 
     let durationText = document.createElement('p');
     durationText.classList.add('duration');
@@ -129,11 +128,10 @@ const renderContests = function (contests: ContestMap) {
 };
 
 const updateUntil = function (contest: Contest) {
-    const now = new Date();
     const untilText = document.querySelector('p.until[data-contestname="' + contest.name + '"]');
 
-    if (contest.isComing()) untilText.textContent = TimeFormatter.until2Readable(contest.beginAt - now.getTime());
-    else if (contest.isOnGoing()) untilText.textContent = TimeFormatter.until2Readable(contest.endAt - now.getTime());
+    if (contest.isComing()) untilText.textContent = TimeFormatter.until2Readable(contest.beginAt - Date.now());
+    else if (contest.isOnGoing()) untilText.textContent = TimeFormatter.until2Readable(contest.endAt - Date.now());
 }
 
 Storage.getStorage(Constant.StorageType.LOCAL, [Constant.StorageKey.CONTESTS, Constant.StorageKey.BADGECOLOR], function (obj: any) {
@@ -157,7 +155,6 @@ Storage.getStorage(Constant.StorageType.LOCAL, [Constant.StorageKey.CONTESTS, Co
     chrome.browserAction.setBadgeBackgroundColor({ color: badgeColor });
 
     renderContests(contests);
-    chrome.runtime.sendMessage(MessageFactory.createMessage(Constant.MessageType.SETTIMEINTERVAL, contests));
 });
 
 chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
@@ -174,12 +171,6 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
             rawContests[key].duration
         ));
 
-        console.log('msg: ')
-        console.log(msg);
-        console.log('rawContests: ')
-        console.log(rawContests)
-        console.log('contests: ')
-        console.log(contests);
         renderContests(contests);
     }
     else if (msg.command == Constant.MessageType.UPDATETIME) {

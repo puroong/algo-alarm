@@ -29,8 +29,6 @@ class Crawler {
                         let newContests: ContestMap = ParserFactory.createParser(judgeItem.name).parse(this.responseText);
 
                         Storage.getStorage(Constant.StorageType.LOCAL, [Constant.StorageKey.CONTESTS], function (obj: any) {
-                            let now: Date = new Date();
-
                             let rawCurContests: any = obj[Constant.StorageKey.CONTESTS] || {};
                             let curContestKeys: string[] = Object.keys(rawCurContests);
                             let curContests: ContestMap = {};

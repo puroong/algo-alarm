@@ -8,15 +8,13 @@ import Crawler from './modules/crawler';
 const intervalQueue: number[] = [];
 
 const setTimeIntervals = function (contests: ContestMap) {
-    intervalQueue.forEach(interval => {
-        clearInterval(interval);
-    })
-    intervalQueue.length = 0;
+    while (intervalQueue.length != 0) {
+        clearInterval(intervalQueue.pop())
+    }
 
     const contestKeys = Object.keys(contests);
     for (let key of contestKeys) {
         const interval: number = setInterval(function () {
-            const now: Date = new Date();
             chrome.runtime.sendMessage(MessageFactory.createMessage(Constant.MessageType.UPDATETIME, contests[key]));
 
             if (contests[key].isOver()) {
@@ -68,10 +66,6 @@ chrome.storage.onChanged.addListener(function (changes: any, namespaces: any) {
             rawContests[key].endAt,
             rawContests[key].duration
         ));
-        console.log('rawContests: ')
-        console.log(rawContests)
-        console.log('contests: ')
-        console.log(contests);
 
         const nOnGoing: string = Object.keys(contestKeys.filter(key => contests[key].isOnGoing())).length.toString();
         const nComing: string = Object.keys(contestKeys.filter(key => contests[key].isComing())).length.toString();

@@ -16,16 +16,15 @@ class Contest {
     }
 
     isOver(): boolean {
-        return this.endAt - new Date().getTime() < 0;
+        return this.endAt - Date.now() < 0;
     }
 
     isOnGoing(): boolean {
-        const now = new Date();
-        return this.beginAt - now.getTime() < 0 && this.endAt - now.getTime() > 0;
+        return this.beginAt - Date.now() < 0 && this.endAt - Date.now() > 0;
     }
 
     isComing(): boolean {
-        return this.beginAt - new Date().getTime() > 0;
+        return this.beginAt - Date.now() > 0;
     }
 }
 
