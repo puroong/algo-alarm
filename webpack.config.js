@@ -1,3 +1,5 @@
+const path = require('path');
+
 module.exports = {
     entry: {
         background: './src/background.ts',
@@ -5,12 +7,12 @@ module.exports = {
     },
     output: {
         filename: '[name].js',
-		path: __dirname + '/dist'
+        path: path.join(__dirname, 'dist/')
     },
     mode: "development",
     devtool: "source-map",
     resolve: {
-		extensions: ['.ts']
+        extensions: ['.ts']
     },
     module: {
         rules: [
@@ -19,18 +21,18 @@ module.exports = {
                 exclude: /node_modules/,
                 use: [
                     {
-						loader: 'ts-loader'
+                        loader: 'ts-loader'
                     }
                 ]
             },
             {
                 enforce: 'pre',
                 test: /\.js$/,
-				loader: 'source-map-loader'
+                loader: 'source-map-loader'
             }
         ]
     },
     externals: {
-		"chrome": "chrome"
+        "chrome": "chrome"
     }
-}
+};
