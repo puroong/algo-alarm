@@ -7,6 +7,7 @@ module.exports = {
         filename: '[name].js',
 		path: __dirname + '/dist'
     },
+    mode: "development",
     devtool: "source-map",
     resolve: {
 		extensions: ['.ts']
