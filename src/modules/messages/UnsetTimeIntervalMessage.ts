@@ -1,10 +1,12 @@
 import Message from './message';
 import Constant from '../constant';
-import ContestMap from '../types/contestMap';
 
-class UnsetTimeIntervalMessage extends Message {
+class UnsetTimeIntervalMessage implements Message {
+    command: string;
+    data: any;
     constructor(data: null) {
-        super(Constant.MessageType.UNSETTIMEINTERVAL, data);
+        this.command = Constant.MessageType.UNSETTIMEINTERVAL;
+        this.data = data;
     }
 }
 

@@ -2,9 +2,12 @@ import Message from './message';
 import Constant from '../constant';
 import ContestMap from '../types/contestMap';
 
-class SetTimeIntervalMessage extends Message{
+class SetTimeIntervalMessage implements Message{
+    command: string;
+    data: any;
     constructor(data: ContestMap) {
-        super(Constant.MessageType.SETTIMEINTERVAL, data);
+        this.command = Constant.MessageType.SETTIMEINTERVAL;
+        this.data = data;
     }
 }
 

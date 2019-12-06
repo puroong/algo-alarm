@@ -2,9 +2,12 @@ import Message from './message';
 import Constant from '../constant';
 import ContestMap from '../types/contestMap';
 
-class RenderContestsMessage extends Message{
+class RenderContestsMessage implements Message{
+    command: string;
+    data: any;
     constructor(data: ContestMap) {
-        super(Constant.MessageType.RENDERCONTESTS, data);
+        this.command = Constant.MessageType.RENDERCONTESTS;
+        this.data = data;
     }
 }
 

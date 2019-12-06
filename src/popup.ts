@@ -4,6 +4,7 @@ import Contest from "./modules/types/contest";
 import TimeFormatter from "./modules/timeFormatter";
 import ContestMap from "./modules/types/contestMap";
 import MessageFactory from "./modules/messages/messageFactory";
+import Message from "./modules/messages/message";
 
 const createComingContestNode = function (contest: Contest) {
     let node = document.createElement('div');
@@ -138,7 +139,7 @@ const port = chrome.runtime.connect({
     name: 'algo-alarm'
 });
 
-port.onMessage.addListener(function (msg) {
+port.onMessage.addListener(function (msg: Message) {
     if (msg.command == Constant.MessageType.RENDERCONTESTS) {
         const rawContests: any = msg.data;
         const contestKeys: string[] = Object.keys(rawContests);
@@ -191,36 +192,4 @@ Storage.getStorage(Constant.StorageType.LOCAL, [Constant.StorageKey.CONTESTS, Co
 
     renderContests(contests);
     port.postMessage(MessageFactory.createMessage(Constant.MessageType.SETTIMEINTERVAL, contests));
-    //chrome.runtime.sendMessage(MessageFactory.createMessage(Constant.MessageType.SETTIMEINTERVAL, contests));
 });
-
-//chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
-//    if (msg.command == Constant.MessageType.RENDERCONTESTS) {
-//        const rawContests: any = msg.data;
-//        const contestKeys: string[] = Object.keys(rawContests);
-//        let contests: ContestMap = {};
-//        contestKeys.forEach(key => contests[key] = new Contest(
-//            rawContests[key].siteName,
-//            rawContests[key].siteUrl,
-//            rawContests[key].name,
-//            rawContests[key].beginAt,
-//            rawContests[key].endAt,
-//            rawContests[key].duration
-//        ));
-
-//        renderContests(contests);
-//    }
-//    else if (msg.command == Constant.MessageType.UPDATETIME) {
-//        const rawContest: any = msg.data;
-//        const contest = new Contest(
-//            rawContest.siteName,
-//            rawContest.siteUrl,
-//            rawContest.name,
-//            rawContest.beginAt,
-//            rawContest.endAt,
-//            rawContest.duration
-//        );
-
-//        updateUntil(contest);
-//    }
-//});

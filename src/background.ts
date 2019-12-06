@@ -38,7 +38,6 @@ chrome.runtime.onConnect.addListener(function (port) {
     const intervalQueue: number[] = [];
 
     const unsetTimeIntervals = function () {
-        console.log('unset intervals');
         while (intervalQueue.length != 0) {
             clearInterval(intervalQueue.pop())
         }
@@ -83,7 +82,6 @@ chrome.runtime.onConnect.addListener(function (port) {
     });
 
     port.onDisconnect.addListener(function () {
-        console.log('disconnect');
         unsetTimeIntervals();
     });
 });

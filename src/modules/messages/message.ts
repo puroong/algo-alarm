@@ -1,11 +1,6 @@
-abstract class Message {
-    protected command: string;
-    protected data: any;
-
-    protected constructor(command: string, data: any) {
-        this.command = command;
-        this.data = data;
-    }
+interface Message {
+    command: string;
+    data: any;
 }
 
 export default Message;
