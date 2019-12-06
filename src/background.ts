@@ -54,7 +54,6 @@ chrome.storage.onChanged.addListener(function (changes: any, namespaces: any) {
     if (badgeColor) {
         chrome.browserAction.setBadgeBackgroundColor({ color: badgeColor });
     }
-    console.log(rawContests);
     if (rawContests) {
         const contestKeys = Object.keys(rawContests);
         let contests: ContestMap = {};

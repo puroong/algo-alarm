@@ -105,8 +105,6 @@ const createOnGoingContestNode = function (contest: Contest) {
 }
 
 const renderContests = function (contests: ContestMap) {
-    console.log('render contests');
-    console.log(contests);
     if (contests === undefined) return;
 
     let contestList = document.querySelector('.contestList');
