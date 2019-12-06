@@ -3,6 +3,7 @@ import Storage from "./modules/storage";
 import Contest from "./modules/types/contest";
 import TimeFormatter from "./modules/timeFormatter";
 import ContestMap from "./modules/types/contestMap";
+import MessageFactory from "./modules/messages/messageFactory";
 
 const createComingContestNode = function (contest: Contest) {
     let node = document.createElement('div');
@@ -132,30 +133,12 @@ const updateUntil = function (contest: Contest) {
     else if (contest.isOnGoing()) untilText.textContent = TimeFormatter.until2Readable(contest.endAt - Date.now());
 }
 
-Storage.getStorage(Constant.StorageType.LOCAL, [Constant.StorageKey.CONTESTS, Constant.StorageKey.BADGECOLOR], function (obj: any) {
-    const rawContests: any = obj[Constant.StorageKey.CONTESTS] || {};
-    const contestKeys = Object.keys(rawContests);
-    let contests: ContestMap = {};
-    contestKeys.forEach(key => rawContests[key] = contests[key] = new Contest(
-        rawContests[key].siteName,
-        rawContests[key].siteUrl,
-        rawContests[key].name,
-        rawContests[key].beginAt,
-        rawContests[key].endAt,
-        rawContests[key].duration
-    ));
 
-    const badgeColor = obj[Constant.StorageKey.BADGECOLOR];
-
-    const nOnGoing: string = Object.keys(contestKeys.filter(key => contests[key].isOnGoing())).length.toString();
-    const nComing: string = Object.keys(contestKeys.filter(key => contests[key].isComing())).length.toString();
-    chrome.browserAction.setBadgeText({ text: `${nComing}/${nOnGoing}` });
-    chrome.browserAction.setBadgeBackgroundColor({ color: badgeColor });
-
-    renderContests(contests);
+const port = chrome.runtime.connect({
+    name: 'algo-alarm'
 });
 
-chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
+port.onMessage.addListener(function (msg) {
     if (msg.command == Constant.MessageType.RENDERCONTESTS) {
         const rawContests: any = msg.data;
         const contestKeys: string[] = Object.keys(rawContests);
@@ -184,4 +167,60 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 
         updateUntil(contest);
     }
+})
+
+Storage.getStorage(Constant.StorageType.LOCAL, [Constant.StorageKey.CONTESTS, Constant.StorageKey.BADGECOLOR], function (obj: any) {
+    const rawContests: any = obj[Constant.StorageKey.CONTESTS] || {};
+    const contestKeys = Object.keys(rawContests);
+    let contests: ContestMap = {};
+    contestKeys.forEach(key => rawContests[key] = contests[key] = new Contest(
+        rawContests[key].siteName,
+        rawContests[key].siteUrl,
+        rawContests[key].name,
+        rawContests[key].beginAt,
+        rawContests[key].endAt,
+        rawContests[key].duration
+    ));
+
+    const badgeColor = obj[Constant.StorageKey.BADGECOLOR];
+
+    const nOnGoing: string = Object.keys(contestKeys.filter(key => contests[key].isOnGoing())).length.toString();
+    const nComing: string = Object.keys(contestKeys.filter(key => contests[key].isComing())).length.toString();
+    chrome.browserAction.setBadgeText({ text: `${nComing}/${nOnGoing}` });
+    chrome.browserAction.setBadgeBackgroundColor({ color: badgeColor });
+
+    renderContests(contests);
+    port.postMessage(MessageFactory.createMessage(Constant.MessageType.SETTIMEINTERVAL, contests));
+    //chrome.runtime.sendMessage(MessageFactory.createMessage(Constant.MessageType.SETTIMEINTERVAL, contests));
 });
+
+//chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
+//    if (msg.command == Constant.MessageType.RENDERCONTESTS) {
+//        const rawContests: any = msg.data;
+//        const contestKeys: string[] = Object.keys(rawContests);
+//        let contests: ContestMap = {};
+//        contestKeys.forEach(key => contests[key] = new Contest(
+//            rawContests[key].siteName,
+//            rawContests[key].siteUrl,
+//            rawContests[key].name,
+//            rawContests[key].beginAt,
+//            rawContests[key].endAt,
+//            rawContests[key].duration
+//        ));
+
+//        renderContests(contests);
+//    }
+//    else if (msg.command == Constant.MessageType.UPDATETIME) {
+//        const rawContest: any = msg.data;
+//        const contest = new Contest(
+//            rawContest.siteName,
+//            rawContest.siteUrl,
+//            rawContest.name,
+//            rawContest.beginAt,
+//            rawContest.endAt,
+//            rawContest.duration
+//        );
+
+//        updateUntil(contest);
+//    }
+//});

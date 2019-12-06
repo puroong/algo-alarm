@@ -4,45 +4,7 @@ import Contest from './modules/types/contest';
 import MessageFactory from './modules/messages/messageFactory';
 import Storage from './modules/storage';
 import Crawler from './modules/crawler';
-
-const intervalQueue: number[] = [];
-
-const setTimeIntervals = function (contests: ContestMap) {
-    while (intervalQueue.length != 0) {
-        clearInterval(intervalQueue.pop())
-    }
-
-    const contestKeys = Object.keys(contests);
-    for (let key of contestKeys) {
-        const interval: number = setInterval(function () {
-            chrome.runtime.sendMessage(MessageFactory.createMessage(Constant.MessageType.UPDATETIME, contests[key]));
-
-            if (contests[key].isOver()) {
-                delete contests[key];
-                clearInterval(interval);
-                Storage.setStorage(Constant.StorageType.LOCAL, { [Constant.StorageKey.CONTESTS]: contests }, function() { });
-            }
-        }, 1000);
-    }
-}
-
-chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
-    if(msg.command == Constant.MessageType.SETTIMEINTERVAL) {
-        const rawContests: any = msg.data;
-        const contestKeys: string[] = Object.keys(rawContests);
-        let contests: ContestMap = {};
-        contestKeys.forEach(key => contests[key] = new Contest(
-            rawContests[key].siteName,
-            rawContests[key].siteUrl,
-            rawContests[key].name,
-            rawContests[key].beginAt,
-            rawContests[key].endAt,
-            rawContests[key].duration
-        ));
-
-        setTimeIntervals(contests);
-    }
-});
+import Message from './modules/messages/message';
 
 chrome.storage.onChanged.addListener(function (changes: any, namespaces: any) {
     let rawContests: any, rawJudges: any, badgeColor: string;
@@ -69,10 +31,61 @@ chrome.storage.onChanged.addListener(function (changes: any, namespaces: any) {
         const nOnGoing: string = Object.keys(contestKeys.filter(key => contests[key].isOnGoing())).length.toString();
         const nComing: string = Object.keys(contestKeys.filter(key => contests[key].isComing())).length.toString();
         chrome.browserAction.setBadgeText({ text: `${nComing}/${nOnGoing}` });
-        chrome.runtime.sendMessage(MessageFactory.createMessage(Constant.MessageType.RENDERCONTESTS, contests));
-        
-        setTimeIntervals(contests);
     }
+});
+
+chrome.runtime.onConnect.addListener(function (port) {
+    const intervalQueue: number[] = [];
+
+    const unsetTimeIntervals = function () {
+        console.log('unset intervals');
+        while (intervalQueue.length != 0) {
+            clearInterval(intervalQueue.pop())
+        }
+    }
+
+    const setTimeIntervals = function (contests: ContestMap) {
+        unsetTimeIntervals();
+
+        const contestKeys = Object.keys(contests);
+        for (let key of contestKeys) {
+            const interval: number = setInterval(function () {
+                port.postMessage(MessageFactory.createMessage(Constant.MessageType.UPDATETIME, contests[key]));
+
+                if (contests[key].isOver()) {
+                    delete contests[key];
+                    clearInterval(interval);
+                    Storage.setStorage(Constant.StorageType.LOCAL, { [Constant.StorageKey.CONTESTS]: contests }, function () { });
+                }
+            }, 1200);
+            intervalQueue.push(interval);
+        }
+    }
+
+    port.onMessage.addListener(function (msg: Message) {
+        if (msg.command == Constant.MessageType.SETTIMEINTERVAL) {
+            const rawContests: any = msg.data;
+            const contestKeys: string[] = Object.keys(rawContests);
+            let contests: ContestMap = {};
+            contestKeys.forEach(key => contests[key] = new Contest(
+                rawContests[key].siteName,
+                rawContests[key].siteUrl,
+                rawContests[key].name,
+                rawContests[key].beginAt,
+                rawContests[key].endAt,
+                rawContests[key].duration
+            ));
+
+            setTimeIntervals(contests);
+        } else if (msg.command == Constant.MessageType.UNSETTIMEINTERVAL) {
+            unsetTimeIntervals();
+        }
+    });
+
+    port.onDisconnect.addListener(function () {
+        console.log('disconnect');
+        unsetTimeIntervals();
+    });
 });
 
 // check contest on *CHROME* start
