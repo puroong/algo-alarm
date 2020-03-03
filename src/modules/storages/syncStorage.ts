@@ -1,11 +1,30 @@
 import Storage from './storage';
 
 class SyncStorage implements Storage {
-    getItemsByKeysAndRunCallback(keys: string[], cb: (obj: any) => void): void {
-        chrome.storage.sync.get(keys, cb);
-    }    
-    setItemsAndRunCallback(items: any, cb: () => void): void {
-        chrome.storage.sync.set(items, cb);
+    get(keys: string[]): Promise<any> {
+        return new Promise(function (resolve, reject) {
+            chrome.storage.sync.get(keys, function(items) {
+                if(chrome.runtime.lastError) {
+                    console.error(chrome.runtime.lastError.message);
+                    reject(chrome.runtime.lastError.message);
+                } else {
+                    resolve(items)
+                }
+            })
+        });
+    }
+
+    set(items: any): Promise<void> {
+        return new Promise(function (resolve, reject) {
+            chrome.storage.sync.set(items, function() {
+                if(chrome.runtime.lastError) {
+                    console.error(chrome.runtime.lastError.message);
+                    reject(chrome.runtime.lastError.message);
+                } else {
+                    resolve()
+                }
+            })
+        });
     }
 }
 

@@ -1,14 +1,15 @@
 import Message from './message';
-import Constant from '../constant';
-import ContestMap from '../types/contestMap';
+import ContestMap from '../dtos/contestMap';
 
 class SetTimeIntervalMessage implements Message{
-    command: string;
+    static TYPE = "SetTimeIntervalMessage";
+
     data: any;
+    type: string = SetTimeIntervalMessage.TYPE;
     constructor(data: ContestMap) {
-        this.command = Constant.MessageType.SETTIMEINTERVAL;
         this.data = data;
     }
+
 }
 
 export default SetTimeIntervalMessage;

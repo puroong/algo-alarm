@@ -1,12 +1,30 @@
 import Storage from './storage';
 
 class LocalStorage implements Storage {
-    getItemsByKeysAndRunCallback(keys: string[], cb: (obj: any) => void): void {
-        chrome.storage.local.get(keys, cb)
+    get(keys: string[]): Promise<any> {
+        return new Promise(function (resolve, reject) {
+            chrome.storage.local.get(keys, function(items) {
+                if(chrome.runtime.lastError) {
+                    console.error(chrome.runtime.lastError.message);
+                    reject(chrome.runtime.lastError.message);
+                } else {
+                    resolve(items)
+                }
+            })
+        });
     }
 
-    setItemsAndRunCallback(items: any, cb: () => void): void {
-        chrome.storage.local.set(items, cb);
+    set(items: any): Promise<void> {
+        return new Promise(function (resolve, reject) {
+            chrome.storage.local.set(items, function() {
+                if(chrome.runtime.lastError) {
+                    console.error(chrome.runtime.lastError.message);
+                    reject(chrome.runtime.lastError.message);
+                } else {
+                    resolve()
+                }
+            })
+        });
     }
 }
 

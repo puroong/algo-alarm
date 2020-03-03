@@ -1,6 +1,10 @@
 import BackgroundScriptRunner from './modules/backgroundScriptRunner';
-import LocalStorage from './modules/storages/localStorage';
+import JudgeLocalStorage from "./modules/storages/judgeLocalStorage";
+import CodeForceJudge from "./modules/judges/CodeForceJudge";
+import AcmJudge from "./modules/judges/AcmJudge";
 
-const storage = new LocalStorage();
-const backgroundScriptRunner = new BackgroundScriptRunner(storage)
-backgroundScriptRunner.run()
+const storage = new JudgeLocalStorage();
+storage.setBadgeColor('green');
+const judges = [new AcmJudge(), new CodeForceJudge()];
+const backgroundScriptRunner = new BackgroundScriptRunner(storage, judges);
+backgroundScriptRunner.run();

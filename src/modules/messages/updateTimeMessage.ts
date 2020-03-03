@@ -1,12 +1,12 @@
 import Message from './message';
-import Constant from '../constant';
-import Contest from '../types/contest';
+import Contest from '../dtos/contest';
 
 class UpdateTimeMessage implements Message{
-    command: string;
+    static TYPE = "UpdateTimeMessage";
+
     data: any;
+    type: string = UpdateTimeMessage.TYPE;
     constructor(data: Contest) {
-        this.command = Constant.MessageType.UPDATETIME;
         this.data = data;
     }
 }

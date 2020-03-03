@@ -1,6 +1,6 @@
 interface Storage {
-    getItemsByKeysAndRunCallback(keys: string[], cb: (obj: any) => void): void
-    setItemsAndRunCallback(items: any, cb: () => void): void
+    get(keys: string[]): Promise<any>
+    set(items: any): Promise<void>
 }
 
 export default Storage;
