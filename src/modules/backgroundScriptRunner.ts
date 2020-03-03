@@ -2,11 +2,17 @@ import Constant from './constant';
 import ContestMap from './types/contestMap';
 import Contest from './types/contest';
 import MessageFactory from './messages/messageFactory';
-import Storage from './storage';
+import Storage from './storages/storage';
 import Crawler from './crawler';
 import Message from './messages/message';
 
 export default class BackgroundScriptRunner {
+    private storage: Storage
+
+    constructor(storage: Storage) {
+        this.storage = storage
+    }
+
     run() {
         this.setStorageOnChangedListener()
         this.setPortOnConnectListener()
@@ -37,7 +43,7 @@ export default class BackgroundScriptRunner {
                         if (contests[key].isOver()) {
                             delete contests[key];
                             clearInterval(interval);
-                            Storage.setStorage(Constant.StorageType.LOCAL, { [Constant.StorageKey.CONTESTS]: contests }, function () { });
+                            this.storage.setItemsAndRunCallback({ [Constant.StorageKey.CONTESTS]: contests }, function () { });
                         }
                     }, 1200);
                     intervalQueue.push(interval);
@@ -107,6 +113,8 @@ export default class BackgroundScriptRunner {
     }
 
     private setAppOnInstalledListener() {
+        const storage = this.storage
+
         chrome.runtime.onInstalled.addListener(function () {
             let judges = {
                 'acmicpc': {
@@ -119,7 +127,7 @@ export default class BackgroundScriptRunner {
                 }
             };
             let badgeColor = 'red';
-            Storage.setStorage(Constant.StorageType.LOCAL, { [Constant.StorageKey.BADGECOLOR]: badgeColor, [Constant.StorageKey.JUDGES]: judges }, function () {
+            storage.setItemsAndRunCallback({ [Constant.StorageKey.BADGECOLOR]: badgeColor, [Constant.StorageKey.JUDGES]: judges }, function () {
                 Crawler.crawlContests();
             })
         });

@@ -1,4 +1,3 @@
-enum StorageType { LOCAL, SYNC }
 const StorageKey = {
     JUDGES: 'judges',
     CONTESTS: 'contests',
@@ -21,7 +20,6 @@ enum JudgeUrl {
 const ProxyUrl = 'https://x434f5253.herokuapp.com/';
 
 export default {
-    StorageType,
     StorageKey,
     JudgeName,
     JudgeUrl,

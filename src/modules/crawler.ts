@@ -1,4 +1,5 @@
-import Storage from './storage';
+import Storage from './storages/storage';
+import LocalStorage from './storages/localStorage';
 import Constant from './constant';
 import ParserFactory from './parsers/parserFactory';
 import ContestMap from './types/contestMap';
@@ -7,8 +8,10 @@ import Judge from './types/judge';
 import JudgeMap from './types/judgeMap';
 
 class Crawler {
+    static storage: Storage = new LocalStorage()
+
     static crawlContests(): void {
-        Storage.getStorage(Constant.StorageType.LOCAL, [Constant.StorageKey.JUDGES], function (obj: any) {
+        Crawler.storage.getItemsByKeysAndRunCallback([Constant.StorageKey.JUDGES], function (obj: any) {
             const rawJudges: any = obj[Constant.StorageKey.JUDGES] || {};
             const judgeKeys = Object.keys(rawJudges)
 
@@ -28,7 +31,7 @@ class Crawler {
                     if (this.readyState === 4 && this.status === 200) {
                         let newContests: ContestMap = ParserFactory.createParser(judgeItem.name).parse(this.responseText);
 
-                        Storage.getStorage(Constant.StorageType.LOCAL, [Constant.StorageKey.CONTESTS], function (obj: any) {
+                        Crawler.storage.getItemsByKeysAndRunCallback([Constant.StorageKey.CONTESTS], function (obj: any) {
                             let rawCurContests: any = obj[Constant.StorageKey.CONTESTS] || {};
                             let curContestKeys: string[] = Object.keys(rawCurContests);
                             let curContests: ContestMap = {};
@@ -58,7 +61,7 @@ class Crawler {
                                 [Constant.StorageKey.CONTESTS]: totalContests
                             };
 
-                            Storage.setStorage(Constant.StorageType.LOCAL, totalContestItems, function () { });
+                            Crawler.storage.setItemsAndRunCallback(totalContestItems, function () { });
                         });
                     } else {
                         console.log(this.status);

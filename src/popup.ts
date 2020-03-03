@@ -1,10 +1,12 @@
 import Constant from "./modules/constant";
-import Storage from "./modules/storage";
+import LocalStorage from "./modules/storages/localStorage";
 import Contest from "./modules/types/contest";
 import TimeFormatter from "./modules/timeFormatter";
 import ContestMap from "./modules/types/contestMap";
 import MessageFactory from "./modules/messages/messageFactory";
 import Message from "./modules/messages/message";
+
+const storage = new LocalStorage()
 
 const createComingContestNode = function (contest: Contest) {
     let node = document.createElement('div');
@@ -170,7 +172,7 @@ port.onMessage.addListener(function (msg: Message) {
     }
 })
 
-Storage.getStorage(Constant.StorageType.LOCAL, [Constant.StorageKey.CONTESTS, Constant.StorageKey.BADGECOLOR], function (obj: any) {
+storage.getItemsByKeysAndRunCallback([Constant.StorageKey.CONTESTS, Constant.StorageKey.BADGECOLOR], function (obj: any) {
     const rawContests: any = obj[Constant.StorageKey.CONTESTS] || {};
     const contestKeys = Object.keys(rawContests);
     let contests: ContestMap = {};
