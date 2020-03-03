@@ -3,7 +3,7 @@ import LocalStorage from "./modules/storages/localStorage";
 import Contest from "./modules/types/contest";
 import TimeFormatter from "./modules/timeFormatter";
 import ContestMap from "./modules/types/contestMap";
-import MessageFactory from "./modules/messages/messageFactory";
+import SetTimeIntervalMessage from './modules/messages/setTimeIntervalMessage'
 import Message from "./modules/messages/message";
 
 const storage = new LocalStorage()
@@ -193,5 +193,5 @@ storage.getItemsByKeysAndRunCallback([Constant.StorageKey.CONTESTS, Constant.Sto
     chrome.browserAction.setBadgeBackgroundColor({ color: badgeColor });
 
     renderContests(contests);
-    port.postMessage(MessageFactory.createMessage(Constant.MessageType.SETTIMEINTERVAL, contests));
+    port.postMessage(new SetTimeIntervalMessage(contests));
 });

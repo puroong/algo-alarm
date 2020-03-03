@@ -1,7 +1,7 @@
 import Constant from './constant';
 import ContestMap from './types/contestMap';
 import Contest from './types/contest';
-import MessageFactory from './messages/messageFactory';
+import UpdateTimeMessage from './messages/updateTimeMessage'
 import Storage from './storages/storage';
 import Crawler from './crawler';
 import Message from './messages/message';
@@ -38,7 +38,7 @@ export default class BackgroundScriptRunner {
                 const contestKeys = Object.keys(contests);
                 for (let key of contestKeys) {
                     const interval: number = setInterval(function () {
-                        port.postMessage(MessageFactory.createMessage(Constant.MessageType.UPDATETIME, contests[key]));
+                        port.postMessage(new UpdateTimeMessage(contests[key]));
         
                         if (contests[key].isOver()) {
                             delete contests[key];
