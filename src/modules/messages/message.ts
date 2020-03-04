@@ -1,6 +1,6 @@
 interface Message {
-    command: string;
     data: any;
+    type: string;
 }
 
 export default Message;

@@ -1,12 +1,12 @@
 import Message from './message';
-import Constant from '../constant';
-import ContestMap from '../types/contestMap';
+import ContestMap from '../dtos/contestMap';
 
 class RenderContestsMessage implements Message{
-    command: string;
+    static TYPE = "RenderContestsMessage";
+
     data: any;
+    type: string = RenderContestsMessage.TYPE;
     constructor(data: ContestMap) {
-        this.command = Constant.MessageType.RENDERCONTESTS;
         this.data = data;
     }
 }

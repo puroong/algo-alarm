@@ -1,7 +1,6 @@
-import ContestMap from '../types/contestMap';
+import ContestMap from '../dtos/contestMap';
 
 interface Parser {
-    siteName: string;
     parse(html: string): ContestMap;
 }
 

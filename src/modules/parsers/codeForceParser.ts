@@ -4,7 +4,7 @@ import Contest from '../dtos/contest';
 import ContestMap from '../dtos/contestMap';
 import JudgeInfo from "../dtos/judgeInfo";
 
-class AcmParser implements Parser {
+class CodeForceParser implements Parser {
     private domParser = new DOMParser();
     private judgeInfo: JudgeInfo;
 
@@ -29,7 +29,9 @@ class AcmParser implements Parser {
     }
 
     private getContestElements(htmlDocument: Document): Array<HTMLElement> {
-        const elements = htmlDocument.querySelectorAll('tr.info, tr.success');
+        const contestTableElement = htmlDocument.querySelector('div.datatable');
+
+        const elements = contestTableElement.querySelectorAll('tr[data-contestid]');
         const contestElements: Array<HTMLElement> = [];
 
         elements.forEach(element => contestElements.push(element as HTMLElement));
@@ -43,8 +45,8 @@ class AcmParser implements Parser {
             let dataElements = this.getDataElements(contestElement);
             let name: string = this.parseName(dataElements);
             let beginAt: number = this.parseBeginAt(dataElements);
-            let endAt: number = this.parseEndAt(dataElements);
-            let duration: number = endAt - beginAt;
+            let duration: number = this.parseDuration(dataElements);
+            let endAt: number = beginAt + duration;
 
             contests[name] = new Contest(
                 this.judgeInfo.name,
@@ -64,16 +66,21 @@ class AcmParser implements Parser {
     }
 
     private parseName(dataElements: NodeListOf<HTMLElementTagNameMap['td']>): string {
-        return dataElements[0].querySelector('a').innerText.trim();
+        return dataElements[0].innerText.trim();
     }
 
     private parseBeginAt(dataElements: NodeListOf<HTMLElementTagNameMap["td"]>): number {
-        return Date.parse(TimeFormatter.acmFmt2Iso(dataElements[3].innerText));
+        const msTimeZoneOffset: number = (-180 - new Date().getTimezoneOffset()) * 60 * 1000;
+        return Date.parse(dataElements[2].innerText.split('UTC')[0]) + msTimeZoneOffset;
     }
 
     private parseEndAt(dataElements: NodeListOf<HTMLElementTagNameMap["td"]>): number {
         return Date.parse(TimeFormatter.acmFmt2Iso(dataElements[4].innerText));
     }
+
+    private parseDuration(dataElements: NodeListOf<HTMLElementTagNameMap["td"]>) {
+        return parseInt(dataElements[3].innerText.split(':')[0]) * 3600000;
+    }
 }
 
-export default AcmParser;
+export default CodeForceParser;

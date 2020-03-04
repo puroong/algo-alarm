@@ -1,11 +1,11 @@
 import Message from './message';
-import Constant from '../constant';
 
 class UnsetTimeIntervalMessage implements Message {
-    command: string;
+    static TYPE = "UnsetTimeIntervalMessage";
+
     data: any;
+    type: string = UnsetTimeIntervalMessage.TYPE;
     constructor(data: null) {
-        this.command = Constant.MessageType.UNSETTIMEINTERVAL;
         this.data = data;
     }
 }

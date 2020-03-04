@@ -15,6 +15,17 @@ class Contest {
         this.duration = duration;
     }
 
+    clone(): Contest {
+        return new Contest(
+            this.siteName,
+            this.siteUrl,
+            this.name,
+            this.beginAt,
+            this.endAt,
+            this.duration
+        );
+    }
+
     isOver(): boolean {
         return this.endAt - Date.now() < 0;
     }
