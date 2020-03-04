@@ -9,23 +9,26 @@ import TimeFormatter from "./utils/timeFormatter";
 import Message from "./messages/message";
 import RenderContestsMessage from "./messages/renderContestsMessage";
 import UpdateTimeMessage from "./messages/updateTimeMessage";
+import JudgePort from "./judgePort";
 
 class PopupScriptRunner {
     private storage: JudgeStorage;
-    private port: Port;
+    private port: JudgePort = new JudgePort();
 
     constructor(storage: JudgeStorage) {
         this.storage = storage;
-        this.port = chrome.runtime.connect({
-            name: 'algo-alarm'
-        });
+        this.port.connect('algo-alarm');
     }
 
     async run() {
         const contests = await this.storage.getContests();
 
-        this.render(contests);
+        this.renderAndSendSetTimeIntervalMessage(contests);
         this.setPortOnMessageListener();
+    }
+
+    private renderAndSendSetTimeIntervalMessage(contests: ContestMap) {
+        this.render(contests);
         this.port.postMessage(new SetTimeIntervalMessage(contests));
     }
 
@@ -48,7 +51,7 @@ class PopupScriptRunner {
     }
 
     private setPortOnMessageListener() {
-        this.port.onMessage.addListener(this.portOnMessageListener.bind(this));
+        this.port.onMessage().addListener(this.portOnMessageListener.bind(this));
     }
 
     private portOnMessageListener(message: Message) {
@@ -65,7 +68,7 @@ class PopupScriptRunner {
                 rawContests[key].duration
             ));
 
-            this.render(contests);
+            this.renderAndSendSetTimeIntervalMessage(contests);
         }
         else if (message.type === UpdateTimeMessage.TYPE) {
             const rawContest: any = message.data;

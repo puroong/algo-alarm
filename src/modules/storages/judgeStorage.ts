@@ -1,5 +1,6 @@
 import Storage from './storage';
 import ContestMap from "../dtos/contestMap";
+import JudgePort from "../judgePort";
 
 abstract class JudgeStorage {
     static KEY = {
@@ -13,6 +14,8 @@ abstract class JudgeStorage {
     abstract setContests(contests: ContestMap): Promise<void>;
     abstract getBadgeColor(): Promise<string>;
     abstract setBadgeColor(badgeColor: string): Promise<void>;
+
+    abstract setStorageOnChangedListener(port: JudgePort): void;
 }
 
 export default JudgeStorage;

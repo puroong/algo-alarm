@@ -4,7 +4,6 @@ import CodeForceJudge from "./modules/judges/CodeForceJudge";
 import AcmJudge from "./modules/judges/AcmJudge";
 
 const storage = new JudgeLocalStorage();
-storage.setBadgeColor('green');
 const judges = [new AcmJudge(), new CodeForceJudge()];
 const backgroundScriptRunner = new BackgroundScriptRunner(storage, judges);
 backgroundScriptRunner.run();
