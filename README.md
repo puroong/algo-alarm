@@ -2,6 +2,7 @@
 
 > chrome extension that gives notice of algorithm contests on acmicpc.net, codeforces.com
 
+![run-and-install](https://github.com/algo-alarm/.github/run-and-install-algo-alarm.gif)
 ## Installation
 
 ### Requirements
